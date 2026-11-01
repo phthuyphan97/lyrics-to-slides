@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lyrics → PowerPoint (Worship Team)</title>
+<script src="lib/pptxgen.bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #d3ddd9;
+    --card: #dde6e2;
+    --ink: #1d332c;
+    --muted: #6f857d;
+    --dark: linear-gradient(145deg, #3f7262, #1c3a31);
+    --green: #2b5546;
+    --accent: #8f7ff2;
+    --shadow: #b3c2bc;
+    --light: #f3f8f6;
+    --raise: 8px 8px 18px var(--shadow), -8px -8px 18px var(--light);
+    --raise-sm: 4px 4px 10px var(--shadow), -4px -4px 10px var(--light);
+    --inset: inset 5px 5px 12px var(--shadow), inset -5px -5px 12px var(--light);
+    --radius: 20px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Poppins", -apple-system, "Segoe UI", Arial, sans-serif;
+         background: var(--bg); color: var(--ink); min-height: 100vh;
+         background-image: radial-gradient(circle at -8% 40%, #c8d6d0 0 36%, transparent 36.2%); background-attachment: fixed; }
+
+  /* ---------- Thanh tiêu đề ---------- */
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px;
+            padding: 22px 32px 24px; background: linear-gradient(135deg, #2c5547, #17312a); color: #fff;
+            border-radius: 0 0 28px 28px; box-shadow: 0 10px 24px rgba(23, 49, 42, .35); }
+  .topbar .right { display: flex; align-items: center; gap: 16px; }
+  .topbar .left { display: flex; align-items: center; gap: 14px; }
+  .circle { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+            background: linear-gradient(145deg, #3d3d3d, #121212); color: #fff; font-size: 18px; flex: none;
+            box-shadow: 4px 4px 10px rgba(0,0,0,.35), -2px -2px 8px rgba(255,255,255,.08); }
+  .topbar h1 { margin: 0; font-size: 20px; font-weight: 600; }
+  .topbar p { margin: 2px 0 0; font-size: 12px; color: #a9c5bb; }
+  .spec { display: flex; gap: 8px; flex-wrap: wrap; }
+  .spec span { font-size: 11px; font-weight: 500; padding: 6px 12px; border-radius: 999px;
+               background: #3b6b5b; color: #fff;
+               box-shadow: 3px 3px 8px rgba(0,0,0,.25), inset 1px 1px 0 rgba(255,255,255,.12); }
+  /* ---------- Nút chuyển ngôn ngữ ---------- */
+  .lang { display: flex; padding: 4px; border-radius: 999px; background: rgba(0,0,0,.25);
+          box-shadow: inset 2px 2px 6px rgba(0,0,0,.35); }
+  .lang button { border: 0; cursor: pointer; padding: 6px 14px; border-radius: 999px; background: transparent;
+          color: #a9c5bb; font: 600 12px "Poppins", -apple-system, Arial, sans-serif; transition: all .2s; }
+  .lang button.active { background: #f3f8f6; color: #1d332c; box-shadow: 2px 2px 6px rgba(0,0,0,.3); }
+
+  main { display: grid; grid-template-columns: 400px 1fr; gap: 28px; padding: 28px 32px 40px; align-items: start; }
+  .panel { background: var(--card); border-radius: var(--radius); padding: 22px; box-shadow: var(--raise); }
+  .section-title { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+  .section-sub { font-size: 12px; color: var(--muted); margin: 0 0 16px; }
+
+  label.field { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin: 16px 0 8px; }
+  input[type=text], textarea { width: 100%; padding: 12px 16px; border: 0; outline: none; border-radius: 14px;
+            background: var(--bg); box-shadow: var(--inset); font: 14px/1.6 "Poppins", -apple-system, Arial, sans-serif; color: var(--ink); }
+  textarea { height: 360px; resize: vertical; }
+  input[type=text]::placeholder, textarea::placeholder { color: #8fa39b; }
+
+  /* ---------- Hàng tuỳ chọn có công tắc ---------- */
+  .opts { display: grid; gap: 12px; margin-top: 20px; }
+  .opt { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer;
+         padding: 14px 16px; border-radius: 16px; background: var(--card); box-shadow: var(--raise-sm); }
+  .opt b { display: block; font-size: 13px; font-weight: 600; }
+  .opt small { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .opt input { appearance: none; -webkit-appearance: none; flex: none; position: relative; cursor: pointer;
+         width: 46px; height: 26px; border-radius: 999px; background: #c5d2cd; box-shadow: var(--inset); transition: background .2s; }
+  .opt input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%;
+         background: var(--light); box-shadow: 1px 1px 4px rgba(20,50,40,.3); transition: transform .2s; }
+  .opt input:checked { background: var(--dark); box-shadow: none; }
+  .opt input:checked::after { transform: translateX(20px); }
+
+  /* ---------- Nút lớn màu đen ---------- */
+  button.primary { margin-top: 22px; width: 100%; padding: 16px; border: 0; border-radius: 16px; cursor: pointer;
+         background: var(--dark); color: #fff; font: 600 15px "Poppins", -apple-system, Arial, sans-serif;
+         box-shadow: 6px 6px 16px #9fb1aa, -6px -6px 16px var(--light); display: flex; align-items: center; justify-content: center; gap: 10px; }
+  button.primary:hover { filter: brightness(1.15); }
+  button.primary:active { transform: translateY(1px); }
+  button.primary:disabled { opacity: .5; cursor: default; }
+
+  .hint { font-size: 11.5px; color: var(--muted); line-height: 1.7; margin: 18px 4px 0; }
+  .hint code { background: var(--bg); box-shadow: var(--inset); padding: 1px 6px; border-radius: 6px; color: var(--green); }
+
+  /* ---------- Thẻ thống kê ---------- */
+  .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 22px; }
+  .stat { padding: 12px 14px; border-radius: 14px; background: var(--card); box-shadow: var(--raise-sm); }
+  .stat span { display: block; font-size: 11px; color: var(--muted); }
+  .stat b { display: block; font-size: 18px; font-weight: 600; margin-top: 2px; color: var(--green); }
+
+  /* ---------- Xem trước slide (đúng tỉ lệ: 13.333in, chữ 54pt, lề 0.3in) ---------- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+  .slide { position: relative; aspect-ratio: 16/9; background: #000; color: #fff; border-radius: 16px;
+           container-type: inline-size; overflow: hidden; box-shadow: var(--raise); }
+  .slide .body { position: absolute; inset: 0; padding: 2.25cqw; display: flex; flex-direction: column;
+           justify-content: center; align-items: center; text-align: center;
+           font-family: Arial, sans-serif; font-weight: bold; font-size: 5.625cqw; line-height: 1.2; }
+  .slide .body div { white-space: nowrap; }
+  .slide .num { position: absolute; top: 10px; left: 10px; z-index: 1; display: flex; align-items: center; gap: 5px;
+           font: 500 10px "Poppins", Arial, sans-serif; color: #ddd; background: rgba(255,255,255,.12);
+           padding: 3px 9px; border-radius: 999px; }
+  .slide .num::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .empty { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size: 13px; padding: 60px 20px;
+           border-radius: 16px; box-shadow: var(--inset); background: var(--bg); }
+
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } .spec { display: none; } }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="left">
+    <div class="circle">♪</div>
+    <div>
+      <h1>Lyrics → PowerPoint</h1>
+      <p data-i18n="subtitle"></p>
+    </div>
+  </div>
+  <div class="right">
+    <div class="spec">
+      <span data-i18n="specBg"></span><span>Arial Bold 54</span><span data-i18n="specColor"></span><span data-i18n="specAlign"></span><span data-i18n="specLines"></span>
+    </div>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="vi">VI</button>
+      <button type="button" data-lang="en">EN</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="panel">
+    <p class="section-title" data-i18n="song"></p>
+    <p class="section-sub" data-i18n="songSub"></p>
+
+    <label class="field" for="title" data-i18n="titleLabel"></label>
+    <input type="text" id="title" data-i18n-ph="titlePh">
+
+    <label class="field" for="lyrics" data-i18n="lyricsLabel"></label>
+    <textarea id="lyrics" data-i18n-ph="lyricsPh"></textarea>
+
+    <div class="opts">
+      <label class="opt"><span><b data-i18n="optTwo"></b><small data-i18n="optTwoSub"></small></span><input type="checkbox" id="twoVisual"></label>
+      <label class="opt"><span><b data-i18n="optTitle"></b><small data-i18n="optTitleSub"></small></span><input type="checkbox" id="titleSlide"></label>
+      <label class="opt"><span><b data-i18n="optBlank"></b><small data-i18n="optBlankSub"></small></span><input type="checkbox" id="blankEnd" checked></label>
+      <label class="opt"><span><b data-i18n="optLabels"></b><small>[Chorus], Verse 1:, ĐK:</small></span><input type="checkbox" id="skipLabels" checked></label>
+    </div>
+
+    <button class="primary" id="makeBtn" data-i18n="makeBtn"></button>
+
+    <p class="hint" data-i18n="hint"></p>
+  </section>
+
+  <section>
+    <div class="stats">
+      <div class="stat"><span data-i18n="statSlides"></span><b id="statSlides">0</b></div>
+      <div class="stat"><span data-i18n="statLines"></span><b id="statLines">0</b></div>
+      <div class="stat"><span data-i18n="statWrapped"></span><b id="statWrapped">0</b></div>
+    </div>
+    <div class="grid" id="preview"></div>
+  </section>
+</main>
+
+<script>
+  const LYRIC_LINES_PER_SLIDE = 2;
+  const FONT_PT = 54;
+  const SLIDE_W_IN = 13.333, MARGIN_IN = 0.3;
+  // Bề rộng tối đa của 1 dòng (pt), chừa 6% an toàn
+  const MAX_LINE_PT = (SLIDE_W_IN - 2 * MARGIN_IN) * 72 * 0.94;
+  const NBSP = "\u00A0";
+  const GLUE = "~";
+
+  const $ = (id) => document.getElementById(id);
+
+  // Đo bề rộng chữ thật bằng canvas (Arial Bold 54 → đơn vị pt)
+  const ctx = document.createElement("canvas").getContext("2d");
+  ctx.font = `bold ${FONT_PT}px Arial`;
+  const measure = (s) => ctx.measureText(s.split(GLUE).join(" ")).width;
+
+  const LABEL_RE = /^\s*(\[.*\]|(verse|chorus|bridge|pre[- ]?chorus|intro|outro|tag|ending|interlude|refrain|v\d+|c\d+|đk|điệp khúc|phiên khúc|pk|câu|đoạn)\s*\d*\s*[:.\-]?\s*(x\s*\d+)?)\s*$/i;
+  const PUNCT_END = /[,;:.!?…–—]$/;
+  // Những chữ thường mở đầu một cụm từ → không nên đứng cuối dòng (dính với chữ phía sau)
+  const LEADING_WORDS = new Set((
+    "và với khi mỗi mọi những các một của cho là trong ngoài nơi đến để như thì mà hay hoặc " +
+    "sẽ đã đang không chẳng chưa chớ đừng rất luôn hằng vẫn còn cũng bởi vì nếu dù tuy từ tới " +
+    "trên dưới giữa theo " +
+    "the a an and or of to in on at for with my your his our their i'm you're"
+  ).split(/\s+/));
+  // Từ ghép thường gặp trong thánh ca → không bao giờ tách ra 2 dòng
+  const COMPOUNDS = new Set((
+    "bao giờ|bao la|mãi mãi|đời đời|tình yêu|yêu thương|ân điển|thánh linh|chúa trời|giê xu|cứu chúa|" +
+    "cứu rỗi|đơn chiếc|sợ chi|hằng bên|luôn luôn|vinh quang|ngợi khen|tôn vinh|thờ phượng|bình an|" +
+    "vui mừng|hy vọng|đức tin|thập tự|huyết báu|nhân từ|thành tín|quyền năng|chiên con|nước trời|" +
+    "thiên đàng|đất trời|muôn dân|muôn đời|con đường|cuộc đời|trái tim|tâm hồn|linh hồn|tấm lòng|" +
+    "hằng ngày|mỗi ngày|gian nguy|nao núng|tin quyết|cậy trông|phán hứa|bên cạnh|khắp nơi|giờ đây|" +
+    "ngày nay|hôm nay|thế gian|tội lỗi|chân lý|sự sống|phước hạnh|ơn phước|chúc tụng|cảm tạ|" +
+    "hát ca|ca ngợi|dâng lên|tình thương|mến yêu|đấng christ|lời chúa|ngợi ca"
+  ).split("|"));
+  const clean = (w) => w.toLowerCase().replace(/[^\p{L}\p{N}'’-]/gu, "").replace(/-/g, " ");
+
+  /**
+   * Ngắt 1 câu thành các dòng hiển thị vừa khung, không để chữ lẻ loi.
+   * Ưu tiên ngắt sau dấu câu; nếu không có thì chia đôi cân bằng nhất.
+   */
+  function wrapLine(line) {
+    if (measure(line) <= MAX_LINE_PT) return [line];
+    const words = line.split(" ");
+    if (words.length < 2) return [line];
+
+    let best = null;
+    for (let k = 1; k < words.length; k++) {
+      const a = words.slice(0, k).join(" "), b = words.slice(k).join(" ");
+      const wa = measure(a), wb = measure(b);
+      const fits = wa <= MAX_LINE_PT && wb <= MAX_LINE_PT;
+      // điểm càng thấp càng tốt
+      let score = Math.abs(wa - wb);
+      if (PUNCT_END.test(words[k - 1])) score -= MAX_LINE_PT * 0.5; // thích ngắt sau dấu phẩy
+      const prev = clean(words[k - 1]), next = clean(words[k]);
+      if (LEADING_WORDS.has(prev)) score += MAX_LINE_PT * 0.3;       // đừng để "khi", "mỗi"... cuối dòng
+      else if (LEADING_WORDS.has(next)) score -= MAX_LINE_PT * 0.2;  // thích bắt đầu dòng mới bằng "khi", "và"...
+      if (COMPOUNDS.has(prev + " " + next)) score += MAX_LINE_PT * 0.6; // không tách từ ghép
+      if (!fits) score += MAX_LINE_PT * 10;
+      if (!best || score < best.score) best = { score, a, b };
+    }
+    return [...wrapLine(best.a), ...wrapLine(best.b)];
+  }
+
+  const display = (s) => s.split(GLUE).join(" ");
+
+  /** Trả về mảng slide; mỗi slide = mảng các dòng hiển thị. */
+  let lastStats = { lines: 0, wrapped: 0 };
+  function buildSlides(text, skipLabels, twoVisual) {
+    lastStats = { lines: 0, wrapped: 0 };
+    const lines = text.replace(/\r\n?/g, "\n").split("\n").map(l => l.replace(/\s+/g, " ").trim());
+    const sections = [];
+    let current = [];
+    for (const line of lines) {
+      if (line === "" || (skipLabels && LABEL_RE.test(display(line)))) {
+        if (current.length) { sections.push(current); current = []; }
+        continue;
+      }
+      const wrapped = wrapLine(line);
+      lastStats.lines++;
+      if (wrapped.length > 1) lastStats.wrapped++;
+      current.push(wrapped);
+    }
+    if (current.length) sections.push(current);
+
+    const slides = [];
+    for (const sec of sections) {
+      let slide = [], count = 0;
+      for (const wrapped of sec) {
+        const full = twoVisual
+          ? slide.length + wrapped.length > 2
+          : count >= LYRIC_LINES_PER_SLIDE;
+        if (slide.length && full) { slides.push(slide); slide = []; count = 0; }
+        slide.push(...wrapped);
+        count++;
+      }
+      if (slide.length) slides.push(slide);
+    }
+    return slides.map(s => s.map(display));
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  }
+
+  const currentSlides = () => buildSlides($("lyrics").value, $("skipLabels").checked, $("twoVisual").checked);
+
+  function renderPreview() {
+    const slides = currentSlides();
+    $("statSlides").textContent = slides.length;
+    $("statLines").textContent = lastStats.lines;
+    $("statWrapped").textContent = lastStats.wrapped;
+    $("preview").innerHTML = slides.length
+      ? slides.map((s, i) =>
+          `<div class="slide"><span class="num">${t("slide")} ${i + 1}</span><div class="body">` +
+          s.map(l => `<div>${escapeHtml(l)}</div>`).join("") + `</div></div>`
+        ).join("")
+      : `<div class="empty">${t("empty")}</div>`;
+  }
+
+  const TEXT_STYLE = {
+    x: 0, y: 0, w: "100%", h: "100%",
+    fontFace: "Arial", fontSize: FONT_PT, bold: true, color: "FFFFFF",
+    align: "center", valign: "middle", margin: MARGIN_IN * 72, fit: "none",
+  };
+
+  async function makePptx() {
+    const slides = currentSlides();
+    if (!slides.length) { alert(t("alertEmpty")); return; }
+    const title = $("title").value.trim();
+
+    const pptx = new PptxGenJS();
+    pptx.layout = "LAYOUT_16x9";
+    pptx.title = title || "Lyrics";
+    pptx.defineSlideMaster({ title: "LYRICS", background: { color: "000000" } });
+
+    const addLines = (lines) => {
+      const slide = pptx.addSlide({ masterName: "LYRICS" });
+      slide.background = { color: "000000" };
+      slide.addText(
+        // khoảng trắng không ngắt → PowerPoint không tự xuống dòng giữa cụm từ
+        lines.map((l, i) => ({ text: l.split(" ").join(NBSP), options: { breakLine: i < lines.length - 1 } })),
+        TEXT_STYLE
+      );
+    };
+
+    if ($("titleSlide").checked && title) wrapLine(title).length && addLines(wrapLine(title).map(display));
+    slides.forEach(addLines);
+    if ($("blankEnd").checked) pptx.addSlide({ masterName: "LYRICS" }).background = { color: "000000" };
+
+    const fileName = (title || "Lyrics").replace(/[\\/:*?"<>|]/g, "").trim() || "Lyrics";
+    $("makeBtn").disabled = true;
+    try {
+      await pptx.writeFile({ fileName: fileName + ".pptx" });
+    } finally {
+      $("makeBtn").disabled = false;
+    }
+  }
+
+  ["lyrics", "skipLabels", "twoVisual"].forEach(id => $(id).addEventListener("input", renderPreview));
+  ["skipLabels", "twoVisual"].forEach(id => $(id).addEventListener("change", renderPreview));
+  $("makeBtn").addEventListener("click", makePptx);
+
+  // ---------- Song ngữ Việt / Anh ----------
+  const I18N = {
+    vi: {
+      subtitle: "Worship Team · tạo slide lời bài hát",
+      specBg: "Nền đen", specColor: "Chữ trắng", specAlign: "Canh giữa", specLines: "2 câu / slide",
+      song: "Bài hát", songSub: "Dán lời, xem trước, rồi tải về.",
+      titleLabel: "Tên bài hát (tên file)", titlePh: "Ví dụ: Amazing Grace",
+      lyricsLabel: "Lời bài hát",
+      lyricsPh: "Dán lời bài hát vào đây...\n\nMỗi dòng = 1 câu hát.\nĐể 1 dòng trống giữa các đoạn (verse / chorus).",
+      optTwo: "Tối đa 2 dòng / slide", optTwoSub: "Câu dài bị ngắt sẽ nằm riêng 1 slide",
+      optTitle: "Slide tiêu đề", optTitleSub: "Thêm tên bài hát ở slide đầu",
+      optBlank: "Slide trống ở cuối", optBlankSub: "Một slide đen để kết thúc",
+      optLabels: "Bỏ nhãn đoạn",
+      makeBtn: "⏻&nbsp; Tạo file PowerPoint",
+      hint: "• Câu dài được <b>tự ngắt ở chỗ đẹp</b>: sau dấu phẩy, hoặc chia đôi cân bằng, không tách từ ghép.<br>" +
+            "• Giữ chặt một cụm từ bằng dấu <code>~</code>, ví dụ <code>không~bao~giờ</code>.<br>" +
+            "• Dòng trống = đoạn mới → slide mới.<br>" +
+            "• Phần xem trước hiển thị đúng như trên PowerPoint.",
+      statSlides: "Slide", statLines: "Câu hát", statWrapped: "Câu được ngắt",
+      slide: "Slide", empty: "Dán lời bài hát bên trái để xem trước các slide.",
+      alertEmpty: "Vui lòng dán lời bài hát trước.",
+    },
+    en: {
+      subtitle: "Worship Team · lyrics slide maker",
+      specBg: "Black background", specColor: "White text", specAlign: "Centered", specLines: "2 lines / slide",
+      song: "Song", songSub: "Paste lyrics, preview, then download.",
+      titleLabel: "Song title (file name)", titlePh: "e.g. Amazing Grace",
+      lyricsLabel: "Lyrics",
+      lyricsPh: "Paste the lyrics here...\n\nEach line = 1 lyric line.\nLeave a blank line between sections (verse / chorus).",
+      optTwo: "Max 2 lines / slide", optTwoSub: "A long line that wraps gets its own slide",
+      optTitle: "Title slide", optTitleSub: "Show the song title on the first slide",
+      optBlank: "Blank slide at end", optBlankSub: "A black slide to finish",
+      optLabels: "Remove section labels",
+      makeBtn: "⏻&nbsp; Create PowerPoint",
+      hint: "• Long lines are <b>split at natural points</b>: after commas, or balanced in half, keeping phrases together.<br>" +
+            "• Keep words together with <code>~</code>, e.g. <code>never~be~alone</code>.<br>" +
+            "• Blank line = new section → new slide.<br>" +
+            "• The preview looks exactly like the PowerPoint.",
+      statSlides: "Slides", statLines: "Lyric lines", statWrapped: "Lines split",
+      slide: "Slide", empty: "Paste lyrics on the left to preview the slides.",
+      alertEmpty: "Please paste the lyrics first.",
+    },
+  };
+  let lang = localStorage.getItem("lyricsLang") || "vi";
+  const t = (key) => I18N[lang][key] ?? I18N.vi[key];
+
+  function applyLang(newLang) {
+    lang = I18N[newLang] ? newLang : "vi";
+    localStorage.setItem("lyricsLang", lang);
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-i18n]").forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+    document.querySelectorAll(".lang button").forEach(b => b.classList.toggle("active", b.dataset.lang === lang));
+    renderPreview();
+  }
+  document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", () => applyLang(b.dataset.lang)));
+
+  applyLang(lang);
+</script>
+</body>
+</html>
