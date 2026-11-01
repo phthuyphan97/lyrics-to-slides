@@ -106,6 +106,66 @@
   .empty { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size: 13px; padding: 60px 20px;
            border-radius: 16px; box-shadow: var(--inset); background: var(--bg); }
 
+  /* ---------- Mascot mèo tuxedo hoạt hình (Walks in & Thumbs up) ---------- */
+  .cat-toast {
+    position: fixed;
+    bottom: 24px;
+    right: -320px;
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    z-index: 9999;
+    pointer-events: none;
+    transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .cat-toast.show {
+    transform: translateX(-344px);
+  }
+  .cat-bubble {
+    background: #ffffff;
+    color: #17312a;
+    padding: 12px 18px;
+    border-radius: 18px 18px 4px 18px;
+    box-shadow: 0 10px 25px rgba(23, 49, 42, 0.25);
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+    margin-bottom: 70px;
+    opacity: 0;
+    transform: scale(0.7) translateY(10px);
+    transition: all 0.4s 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .cat-toast.show .cat-bubble {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  .cat-svg-box {
+    width: 175px;
+    height: 165px;
+    animation: cat-bob 1.6s ease-in-out infinite alternate;
+    transform-origin: bottom center;
+  }
+  @keyframes cat-bob {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(-6px) rotate(-2deg); }
+  }
+  .cat-arm {
+    animation: thumbs-shake 0.8s ease-in-out infinite alternate;
+    transform-origin: 65px 115px;
+  }
+  @keyframes thumbs-shake {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(-8deg) translateY(-2px); }
+  }
+  .cat-tail {
+    animation: tail-wag 1.2s ease-in-out infinite alternate;
+    transform-origin: 190px 140px;
+  }
+  @keyframes tail-wag {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(10deg); }
+  }
+
   @media (max-width: 900px) { main { grid-template-columns: 1fr; } .spec { display: none; } }
 </style>
 </head>
@@ -159,6 +219,73 @@
     <div class="grid" id="preview"></div>
   </section>
 </main>
+
+<!-- Mascot mèo Tuxedo chúc mừng sau khi tạo PPTX -->
+<div class="cat-toast" id="catToast">
+  <div class="cat-bubble">
+    <span id="catMsg">Slide của bạn đã xong nè! 👍</span>
+  </div>
+  <div class="cat-svg-box">
+    <svg viewBox="0 0 240 220" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="cat-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#12251f" flood-opacity="0.3"/>
+        </filter>
+      </defs>
+      <g filter="url(#cat-shadow)">
+        <!-- Đuôi mèo ngúng nguẩy -->
+        <g class="cat-tail">
+          <path d="M 190 140 Q 225 115 215 80 Q 205 65 195 80 Q 200 105 175 130 Z" fill="#18181b"/>
+          <path d="M 215 80 Q 205 65 195 80 Q 202 72 215 80 Z" fill="#ffffff"/>
+        </g>
+        <!-- Thân mèo đen Tuxedo -->
+        <path d="M 80 170 C 80 115 110 95 145 95 C 185 95 200 125 195 180 C 175 190 100 190 80 170 Z" fill="#18181b"/>
+        <!-- Áo yếm trắng trước ngực -->
+        <path d="M 115 115 C 130 115 142 130 145 155 C 145 178 125 185 110 185 C 98 185 95 170 98 150 C 102 130 108 115 115 115 Z" fill="#ffffff"/>
+        <!-- Hai bàn chân bọc tất trắng -->
+        <ellipse cx="170" cy="182" rx="18" ry="10" fill="#ffffff" stroke="#18181b" stroke-width="2"/>
+        <ellipse cx="108" cy="184" rx="14" ry="9" fill="#ffffff" stroke="#18181b" stroke-width="2"/>
+        <!-- Đầu mèo đen -->
+        <circle cx="115" cy="85" r="46" fill="#18181b"/>
+        <!-- Đôi tai (ngoài đen, trong hồng) -->
+        <polygon points="78,55 92,15 115,45" fill="#18181b"/>
+        <polygon points="84,50 94,25 108,45" fill="#f4a7b9"/>
+        <polygon points="125,45 148,15 160,55" fill="#18181b"/>
+        <polygon points="132,45 146,25 154,50" fill="#f4a7b9"/>
+        <!-- Mặt nạ trắng hình chữ V ngược của mèo Tuxedo -->
+        <path d="M 115 70 L 123 88 C 140 88 148 98 145 112 C 142 122 130 126 115 126 C 100 126 88 122 85 112 C 82 98 90 88 107 88 Z" fill="#ffffff"/>
+        <!-- Mắt xanh ngọc bích long lanh -->
+        <ellipse cx="98" cy="82" rx="9" ry="11" fill="#4ade80"/>
+        <ellipse cx="98" cy="82" rx="4" ry="9" fill="#0f172a"/>
+        <circle cx="95" cy="78" r="3" fill="#ffffff"/>
+        <circle cx="100" cy="85" r="1.5" fill="#ffffff"/>
+        <ellipse cx="132" cy="82" rx="9" ry="11" fill="#4ade80"/>
+        <ellipse cx="132" cy="82" rx="4" ry="9" fill="#0f172a"/>
+        <circle cx="129" cy="78" r="3" fill="#ffffff"/>
+        <circle cx="134" cy="85" r="1.5" fill="#ffffff"/>
+        <!-- Mũi hồng và miệng :3 -->
+        <polygon points="112,98 118,98 115,102" fill="#fb7185"/>
+        <path d="M 115 102 Q 110 108 105 106 M 115 102 Q 120 108 125 106" fill="none" stroke="#334155" stroke-width="2" stroke-linecap="round"/>
+        <!-- Râu mèo -->
+        <line x1="72" y1="96" x2="94" y2="99" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/>
+        <line x1="70" y1="105" x2="92" y2="105" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/>
+        <line x1="136" y1="99" x2="158" y2="96" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/>
+        <line x1="138" y1="105" x2="160" y2="105" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/>
+        <!-- Má hồng e ấp -->
+        <circle cx="86" cy="100" r="5" fill="#fda4af" opacity="0.6"/>
+        <circle cx="144" cy="100" r="5" fill="#fda4af" opacity="0.6"/>
+        <!-- Cánh tay giơ ngón tay cái Thumb-up lắc lư 👍 -->
+        <g class="cat-arm">
+          <path d="M 75 125 C 50 120 35 110 30 95 C 24 85 32 80 42 88 C 50 95 62 108 80 115 Z" fill="#18181b"/>
+          <ellipse cx="32" cy="92" rx="13" ry="11" fill="#ffffff" stroke="#18181b" stroke-width="2"/>
+          <path d="M 30 84 C 28 68 36 66 39 72 C 42 77 40 85 36 86 Z" fill="#ffffff" stroke="#18181b" stroke-width="2"/>
+          <path d="M 24 94 C 26 97 29 97 32 94" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+          <path d="M 28 99 C 30 101 34 100 36 98" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+        </g>
+      </g>
+    </svg>
+  </div>
+</div>
 
 <script>
   const LYRIC_LINES_PER_SLIDE = 2;
@@ -314,6 +441,7 @@
     $("makeBtn").disabled = true;
     try {
       await pptx.writeFile({ fileName: fileName + ".pptx" });
+      triggerCatMascot();
     } finally {
       $("makeBtn").disabled = false;
     }
@@ -344,6 +472,7 @@
       statSlides: "Slide", statLines: "Câu hát", statWrapped: "Câu được ngắt",
       slide: "Slide", empty: "Dán lời bài hát bên trái để xem trước các slide.",
       alertEmpty: "Vui lòng dán lời bài hát trước.",
+      catCheer: "Slide của bạn đã xong nè! 👍",
     },
     en: {
       subtitle: "Worship Team · lyrics slide maker",
@@ -364,6 +493,7 @@
       statSlides: "Slides", statLines: "Lyric lines", statWrapped: "Lines split",
       slide: "Slide", empty: "Paste lyrics on the left to preview the slides.",
       alertEmpty: "Please paste the lyrics first.",
+      catCheer: "Your slides are ready! 👍",
     },
   };
   let lang = localStorage.getItem("lyricsLang") || "vi";
@@ -379,6 +509,19 @@
     renderPreview();
   }
   document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", () => applyLang(b.dataset.lang)));
+
+  let catTimeout = null;
+  function triggerCatMascot() {
+    const toast = $("catToast");
+    const msg = $("catMsg");
+    if (!toast || !msg) return;
+    msg.textContent = t("catCheer");
+    toast.classList.add("show");
+    if (catTimeout) clearTimeout(catTimeout);
+    catTimeout = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 4500);
+  }
 
   applyLang(lang);
 </script>
