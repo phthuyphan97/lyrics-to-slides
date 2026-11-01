@@ -91,13 +91,13 @@
   .stat span { display: block; font-size: 11px; color: var(--muted); }
   .stat b { display: block; font-size: 18px; font-weight: 600; margin-top: 2px; color: var(--green); }
 
-  /* ---------- Xem trước slide (đúng tỉ lệ: 13.333in, chữ 54pt, lề 0.3in) ---------- */
+  /* ---------- Xem trước slide (đúng tỉ lệ: 13.333in, chữ 45pt, lề 0.3in) ---------- */
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
   .slide { position: relative; aspect-ratio: 16/9; background: #000; color: #fff; border-radius: 16px;
            container-type: inline-size; overflow: hidden; box-shadow: var(--raise); }
   .slide .body { position: absolute; inset: 0; padding: 2.25cqw; display: flex; flex-direction: column;
            justify-content: center; align-items: center; text-align: center;
-           font-family: Arial, sans-serif; font-weight: bold; font-size: 5.625cqw; line-height: 1.2; }
+           font-family: Arial, sans-serif; font-weight: bold; font-size: 4.6875cqw; line-height: 1.2; }
   .slide .body div { white-space: nowrap; }
   .slide .num { position: absolute; top: 10px; left: 10px; z-index: 1; display: flex; align-items: center; gap: 5px;
            font: 500 10px "Poppins", Arial, sans-serif; color: #ddd; background: rgba(255,255,255,.12);
@@ -120,7 +120,7 @@
   </div>
   <div class="right">
     <div class="spec">
-      <span data-i18n="specBg"></span><span>Arial Bold 54</span><span data-i18n="specColor"></span><span data-i18n="specAlign"></span><span data-i18n="specLines"></span>
+      <span data-i18n="specBg"></span><span>Arial Bold 45</span><span data-i18n="specColor"></span><span data-i18n="specAlign"></span><span data-i18n="specLines"></span>
     </div>
     <div class="lang" role="group" aria-label="Language">
       <button type="button" data-lang="vi">VI</button>
@@ -164,7 +164,7 @@
 
 <script>
   const LYRIC_LINES_PER_SLIDE = 2;
-  const FONT_PT = 54;
+  const FONT_PT = 45;
   const SLIDE_W_IN = 13.333, MARGIN_IN = 0.3;
   // Bề rộng tối đa của 1 dòng (pt), chừa 6% an toàn
   const MAX_LINE_PT = (SLIDE_W_IN - 2 * MARGIN_IN) * 72 * 0.94;
@@ -173,7 +173,7 @@
 
   const $ = (id) => document.getElementById(id);
 
-  // Đo bề rộng chữ thật bằng canvas (Arial Bold 54 → đơn vị pt)
+  // Đo bề rộng chữ thật bằng canvas (Arial Bold 45 → đơn vị pt)
   const ctx = document.createElement("canvas").getContext("2d");
   ctx.font = `bold ${FONT_PT}px Arial`;
   const measure = (s) => ctx.measureText(s.split(GLUE).join(" ")).width;
