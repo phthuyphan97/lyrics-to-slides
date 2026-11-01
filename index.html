@@ -420,6 +420,11 @@
   $("makeBtn").addEventListener("click", makePptx);
 
   // ---------- Song ngữ Việt / Anh ----------
+  // Icon tải về: mũi tên hướng xuống nằm trên một đường gạch ngang
+  const DOWNLOAD_ICON =
+    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M12 3v12"/><path d="M6.5 10 12 15.5 17.5 10"/><path d="M4.5 20.5h15"/></svg>';
   const I18N = {
     vi: {
       subtitle: "Worship Team · tạo slide lời bài hát",
@@ -432,7 +437,7 @@
       optTitle: "Slide tiêu đề", optTitleSub: "Thêm tên bài hát ở slide đầu",
       optBlank: "Slide trống ở cuối", optBlankSub: "Một slide đen để kết thúc",
       optLabels: "Bỏ nhãn đoạn",
-      makeBtn: "⏻&nbsp; Tạo file PowerPoint",
+      makeBtn: DOWNLOAD_ICON + "Tạo file PowerPoint",
       hint: "• Câu dài được <b>tự ngắt ở chỗ đẹp</b>: sau dấu phẩy, hoặc chia đôi cân bằng, không tách từ ghép.<br>" +
             "• Giữ chặt một cụm từ bằng dấu <code>~</code>, ví dụ <code>không~bao~giờ</code>.<br>" +
             "• Dòng trống = đoạn mới → slide mới.<br>" +
@@ -453,7 +458,7 @@
       optTitle: "Title slide", optTitleSub: "Show the song title on the first slide",
       optBlank: "Blank slide at end", optBlankSub: "A black slide to finish",
       optLabels: "Remove section labels",
-      makeBtn: "⏻&nbsp; Create PowerPoint",
+      makeBtn: DOWNLOAD_ICON + "Create PowerPoint",
       hint: "• Long lines are <b>split at natural points</b>: after commas, or balanced in half, keeping phrases together.<br>" +
             "• Keep words together with <code>~</code>, e.g. <code>never~be~alone</code>.<br>" +
             "• Blank line = new section → new slide.<br>" +
