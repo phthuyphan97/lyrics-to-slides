@@ -109,61 +109,85 @@
   /* ---------- Mascot mèo tuxedo hoạt hình (Walks in & Thumbs up) ---------- */
   .cat-toast {
     position: fixed;
-    bottom: 24px;
-    right: -320px;
+    bottom: 16px;
+    right: -360px;
     display: flex;
     align-items: flex-end;
-    gap: 12px;
+    gap: 8px;
     z-index: 9999;
     pointer-events: none;
     transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   .cat-toast.show {
-    transform: translateX(-344px);
+    transform: translateX(-376px);
   }
   .cat-bubble {
+    position: relative;
     background: #ffffff;
     color: #17312a;
-    padding: 12px 18px;
+    padding: 14px 20px;
     border-radius: 18px 18px 4px 18px;
-    box-shadow: 0 10px 25px rgba(23, 49, 42, 0.25);
+    box-shadow: 0 10px 28px rgba(23, 49, 42, 0.22);
     font-weight: 600;
     font-size: 14px;
     white-space: nowrap;
-    margin-bottom: 70px;
+    margin-bottom: 95px;
     opacity: 0;
     transform: scale(0.7) translateY(10px);
     transition: all 0.4s 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .cat-bubble::after {
+    content: "";
+    position: absolute;
+    right: 28px;
+    bottom: -7px;
+    width: 14px;
+    height: 14px;
+    background: #ffffff;
+    transform: rotate(45deg);
+    border-radius: 2px;
   }
   .cat-toast.show .cat-bubble {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
-  .cat-svg-box {
-    width: 175px;
-    height: 165px;
-    animation: cat-bob 1.6s ease-in-out infinite alternate;
-    transform-origin: bottom center;
+  .cat-avatar-wrap {
+    position: relative;
+    width: 220px;
+    height: 190px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
   }
-  @keyframes cat-bob {
-    0% { transform: translateY(0) rotate(0deg); }
-    100% { transform: translateY(-6px) rotate(-2deg); }
+  .cat-avatar-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 12px 24px rgba(20, 18, 15, .25));
+    transform-origin: 50% 90%;
+    animation: cat-float 3.2s ease-in-out infinite;
   }
-  .cat-arm {
-    animation: thumbs-shake 0.8s ease-in-out infinite alternate;
-    transform-origin: 65px 115px;
+  .cat-glow {
+    position: absolute;
+    z-index: 0;
+    width: 65%;
+    height: 14%;
+    left: 18%;
+    bottom: 3%;
+    border-radius: 50%;
+    background: rgba(0,0,0,.15);
+    filter: blur(12px);
+    animation: shadow-pulse 3.2s ease-in-out infinite;
   }
-  @keyframes thumbs-shake {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(-8deg) translateY(-2px); }
+  @keyframes cat-float {
+    0%, 100% { transform: translateY(0) rotate(-.5deg); }
+    50% { transform: translateY(-8px) rotate(.5deg); }
   }
-  .cat-tail {
-    animation: tail-wag 1.2s ease-in-out infinite alternate;
-    transform-origin: 190px 140px;
-  }
-  @keyframes tail-wag {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(10deg); }
+  @keyframes shadow-pulse {
+    0%, 100% { transform: scale(1); opacity: .8; }
+    50% { transform: scale(.82); opacity: .45; }
   }
 
   @media (max-width: 900px) { main { grid-template-columns: 1fr; } .spec { display: none; } }
@@ -225,98 +249,9 @@
   <div class="cat-bubble">
     <span id="catMsg">Slide của bạn đã xong nè! 👍</span>
   </div>
-  <div class="cat-svg-box">
-    <svg viewBox="0 0 240 220" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <filter id="cat-shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#12251f" flood-opacity="0.3"/>
-        </filter>
-      </defs>
-      <g filter="url(#cat-shadow)">
-        <!-- Đuôi mèo ngúng nguẩy -->
-        <g class="cat-tail">
-          <path d="M 190 140 Q 225 115 215 80 Q 205 65 195 80 Q 200 105 175 130 Z" fill="#18181b"/>
-          <path d="M 215 80 Q 205 65 195 80 Q 202 72 215 80 Z" fill="#ffffff"/>
-        </g>
-        <!-- Thân mèo tuxedo đen -->
-        <path d="M 78 168 C 78 116 106 95 144 95 C 185 95 200 125 195 180 C 175 190 98 190 78 168 Z" fill="#18181b"/>
-        <!-- Ngực lông trắng mềm mại -->
-        <path d="M 112 116 C 132 116 145 130 148 155 C 148 178 126 185 106 185 C 93 185 89 170 93 150 C 97 130 104 116 112 116 Z" fill="#ffffff"/>
-        <!-- Hai chân trước sau tất trắng -->
-        <ellipse cx="170" cy="182" rx="18" ry="10" fill="#ffffff" stroke="#18181b" stroke-width="2"/>
-        <ellipse cx="104" cy="184" rx="14" ry="9" fill="#ffffff" stroke="#18181b" stroke-width="2"/>
-
-        <!-- Đầu mèo tròn to bự -->
-        <circle cx="118" cy="85" r="46" fill="#18181b"/>
-
-        <!-- Tai trái to vểnh -->
-        <path d="M 76 56 C 72 45 80 16 90 12 C 98 10 108 30 114 46 Z" fill="#18181b"/>
-        <path d="M 82 50 C 80 42 85 22 92 18 C 97 18 103 32 108 45 Z" fill="#f4a7b9"/>
-        <!-- Sợi lông tơ trắng tai trái -->
-        <path d="M 88 42 Q 95 32 104 42" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.9"/>
-
-        <!-- Tai phải to vểnh -->
-        <path d="M 122 46 C 128 30 138 10 146 12 C 156 16 164 45 160 56 Z" fill="#18181b"/>
-        <path d="M 128 45 C 133 32 139 18 144 18 C 151 22 156 42 154 50 Z" fill="#f4a7b9"/>
-        <!-- Sợi lông tơ trắng tai phải -->
-        <path d="M 132 42 Q 141 32 148 42" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.9"/>
-
-        <!-- Mảng lông trắng chữ V trên trán kéo dài xuống mõm (White Blaze) -->
-        <path d="M 118 46 C 116 62 113 72 108 80 C 90 80 80 90 80 106 C 80 120 94 126 118 126 C 142 126 156 120 156 106 C 156 90 146 80 128 80 C 123 72 120 62 118 46 Z" fill="#ffffff"/>
-
-        <!-- Đốm lông đen cằm phải đặc trưng (Goatee spot) -->
-        <path d="M 118 115 C 124 114 129 119 128 125 C 124 127 118 127 116 124 C 116 119 117 116 118 115 Z" fill="#18181b"/>
-
-        <!-- Mắt trái hổ phách điềm tĩnh, dễ thương -->
-        <ellipse cx="98" cy="80" rx="9" ry="8" fill="#ca8a04"/>
-        <ellipse cx="98" cy="80" rx="7.5" ry="6.5" fill="#eab308"/>
-        <ellipse cx="98" cy="80" rx="4" ry="6" fill="#0f172a"/>
-        <circle cx="95" cy="77" r="2.2" fill="#ffffff"/>
-        <circle cx="99.5" cy="82" r="1.1" fill="#ffffff"/>
-        <!-- Mí mắt trái dịu dàng -->
-        <path d="M 88 77 Q 98 72 108 77" stroke="#18181b" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-
-        <!-- Mắt phải hổ phách -->
-        <ellipse cx="138" cy="80" rx="9" ry="8" fill="#ca8a04"/>
-        <ellipse cx="138" cy="80" rx="7.5" ry="6.5" fill="#eab308"/>
-        <ellipse cx="138" cy="80" rx="4" ry="6" fill="#0f172a"/>
-        <circle cx="135" cy="77" r="2.2" fill="#ffffff"/>
-        <circle cx="139.5" cy="82" r="1.1" fill="#ffffff"/>
-        <!-- Mí mắt phải -->
-        <path d="M 128 77 Q 138 72 148 77" stroke="#18181b" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-
-        <!-- Râu lông mày màu trắng cong dài phía trên mắt -->
-        <path d="M 94 68 Q 80 50 72 40" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.95"/>
-        <path d="M 99 66 Q 88 46 84 34" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.95"/>
-        <path d="M 142 68 Q 156 50 164 40" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.95"/>
-        <path d="M 137 66 Q 148 46 152 34" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.95"/>
-
-        <!-- Mũi hồng ngọt ngào VỚI ĐỐM ĐEN ĐẶC TRƯNG Ở CÁNH MŨI PHẢI -->
-        <path d="M 112 94 Q 118 91 124 94 Q 126 100 118 105 Q 110 100 112 94 Z" fill="#f472b6"/>
-        <!-- Đốm đen chuẩn 100% như ảnh thật ở cánh mũi phải -->
-        <path d="M 119 94 Q 124 94 124 98 Q 121 102 119 99 Z" fill="#18181b"/>
-
-        <!-- Đường nhân trung và khuôn miệng :3 -->
-        <path d="M 118 105 L 118 110 M 118 110 Q 110 115 102 112 M 118 110 Q 126 115 134 112" stroke="#334155" stroke-width="2" stroke-linecap="round" fill="none"/>
-
-        <!-- Bộ ria mép trắng dài tự nhiên -->
-        <path d="M 92 105 Q 62 101 40 96" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        <path d="M 90 110 Q 58 113 38 113" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        <path d="M 91 115 Q 64 124 45 128" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        <path d="M 144 105 Q 174 101 196 96" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        <path d="M 146 110 Q 178 113 198 113" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        <path d="M 145 115 Q 172 124 191 128" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-
-        <!-- Cánh tay giơ ngón tay cái Thumbs-up 👍 lắc lư -->
-        <g class="cat-arm">
-          <path d="M 72 125 C 48 120 34 110 28 95 C 22 85 30 80 40 88 C 48 95 60 108 76 115 Z" fill="#18181b"/>
-          <ellipse cx="30" cy="92" rx="13" ry="11" fill="#ffffff" stroke="#18181b" stroke-width="2"/>
-          <path d="M 28 84 C 26 68 34 66 37 72 C 40 77 38 85 34 86 Z" fill="#ffffff" stroke="#18181b" stroke-width="2"/>
-          <path d="M 22 94 C 24 97 27 97 30 94" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
-          <path d="M 26 99 C 28 101 32 100 34 98" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
-        </g>
-      </g>
-    </svg>
+  <div class="cat-avatar-wrap">
+    <span class="cat-glow" aria-hidden="true"></span>
+    <img src="cat-mascot.png" alt="A tuxedo cat giving a thumbs-up" class="cat-avatar-img" />
   </div>
 </div>
 
