@@ -29,16 +29,15 @@
          background-image: radial-gradient(circle at -8% 40%, #c8d6d0 0 36%, transparent 36.2%); background-attachment: fixed; }
 
   /* ---------- Thanh tiêu đề ---------- */
-  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px;
-            padding: 22px 32px 24px; background: linear-gradient(135deg, #2c5547, #17312a); color: #fff;
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px;
+            padding: 16px 32px 18px; background: linear-gradient(135deg, #2c5547, #17312a); color: #fff;
             border-radius: 0 0 28px 28px; box-shadow: 0 10px 24px rgba(23, 49, 42, .35); }
   .topbar .right { display: flex; align-items: center; gap: 16px; }
-  .topbar .left { display: flex; align-items: center; gap: 14px; }
-  .circle { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
-            background: linear-gradient(145deg, #3d3d3d, #121212); color: #fff; font-size: 18px; flex: none;
-            box-shadow: 4px 4px 10px rgba(0,0,0,.35), -2px -2px 8px rgba(255,255,255,.08); }
-  .topbar h1 { margin: 0; font-size: 20px; font-weight: 600; }
-  .topbar p { margin: 2px 0 0; font-size: 12px; color: #a9c5bb; }
+  .topbar .left { display: flex; align-items: center; gap: 18px; }
+  .brand-logo { height: 46px; width: auto; object-fit: contain; display: block;
+                filter: drop-shadow(0 2px 8px rgba(0,0,0,.3)); }
+  .brand-divider { width: 1px; height: 32px; background: rgba(255,255,255,.2); }
+  .topbar p.tagline { margin: 0; font-size: 13px; color: #b8d5cb; font-weight: 500; letter-spacing: 0.2px; }
   .spec { display: flex; gap: 8px; flex-wrap: wrap; }
   .spec span { font-size: 11px; font-weight: 500; padding: 6px 12px; border-radius: 999px;
                background: #3b6b5b; color: #fff;
@@ -112,11 +111,9 @@
 <body>
 <header class="topbar">
   <div class="left">
-    <div class="circle">♪</div>
-    <div>
-      <h1>Lyrics → PowerPoint</h1>
-      <p data-i18n="subtitle"></p>
-    </div>
+    <img src="logo.png" alt="Lyrics to Slides by Thuy Phan" class="brand-logo">
+    <div class="brand-divider"></div>
+    <p class="tagline" data-i18n="subtitle"></p>
   </div>
   <div class="right">
     <div class="spec">
