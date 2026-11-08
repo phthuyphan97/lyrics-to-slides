@@ -366,35 +366,69 @@
   const cleanFirstChar = (s) => s.trim().replace(/^[^\p{L}\p{N}]+/u, "");
   const isLower = (s) => /^\p{Ll}/u.test(cleanFirstChar(s));
 
+  /**
+   * Tự động gom các dòng bị ngắt dở (dòng sau viết thường, dòng trước chưa kết câu)
+   * thành một câu hoàn chỉnh duy nhất.
+   */
+  function mergeContinuationLines(lines) {
+    const merged = [];
+    for (const line of lines) {
+      const trimmed = line.replace(/\s+/g, " ").trim();
+      if (!trimmed) {
+        merged.push("");
+        continue;
+      }
+      if (LABEL_RE.test(trimmed)) {
+        merged.push(trimmed);
+        continue;
+      }
+      // Tìm câu có nội dung gần nhất trước đó (bỏ qua dòng trống)
+      let lastNonEmptyIdx = -1;
+      for (let i = merged.length - 1; i >= 0; i--) {
+        if (merged[i] !== "" && !LABEL_RE.test(merged[i])) {
+          lastNonEmptyIdx = i;
+          break;
+        }
+      }
+
+      if (lastNonEmptyIdx >= 0) {
+        const prev = merged[lastNonEmptyIdx];
+        // Nếu dòng này bắt đầu bằng chữ thường VÀ dòng trước chưa kết câu ([.!?…])
+        // -> Gom thành 1 câu duy nhất
+        if (isLower(trimmed) && !/[.!?…]$/.test(prev)) {
+          merged[lastNonEmptyIdx] = prev + " " + trimmed;
+          continue;
+        }
+      }
+      merged.push(trimmed);
+    }
+
+    // Xóa các dòng trống dư thừa bị bỏ lại nếu câu được gộp kéo theo dòng trống
+    const result = [];
+    for (let i = 0; i < merged.length; i++) {
+      if (merged[i] === "" && (result.length === 0 || result[result.length - 1] === "")) continue;
+      result.push(merged[i]);
+    }
+    return result;
+  }
+
   /** Trả về mảng slide; mỗi slide = mảng các dòng hiển thị. */
   let lastStats = { lines: 0, wrapped: 0 };
   function buildSlides(text, skipLabels, twoVisual) {
     lastStats = { lines: 0, wrapped: 0 };
-    const rawLines = text.replace(/\r\n?/g, "\n").split("\n").map(l => l.replace(/\s+/g, " ").trim());
+    const rawLines = text.replace(/\r\n?/g, "\n").split("\n");
+    const lines = mergeContinuationLines(rawLines);
 
-    // 1. Nhóm các dòng thành từng section (phân cách bởi dòng trống hoặc nhãn như [Chorus], [Verse]...)
-    // Trong mỗi section, nếu một dòng bắt đầu bằng chữ thường và dòng trước chưa kết câu (không có [.!?…])
-    // thì được coi là phần tiếp nối của câu trước -> gộp chung vào 1 câu logic.
+    // 1. Nhóm các câu thành từng section (phân cách bởi dòng trống hoặc nhãn như [Chorus], [Verse]...)
     const sections = [];
     let curSec = [];
-    let curSentence = [];
-
-    for (const raw of rawLines) {
-      if (raw === "" || (skipLabels && LABEL_RE.test(display(raw)))) {
-        if (curSentence.length) { curSec.push(curSentence); curSentence = []; }
+    for (const line of lines) {
+      if (line === "" || (skipLabels && LABEL_RE.test(display(line)))) {
         if (curSec.length) { sections.push(curSec); curSec = []; }
         continue;
       }
-      const prev = curSentence[curSentence.length - 1];
-      const isContinuation = prev && isLower(display(raw)) && !/[.!?…]$/.test(display(prev));
-      if (isContinuation) {
-        curSentence.push(raw);
-      } else {
-        if (curSentence.length) curSec.push(curSentence);
-        curSentence = [raw];
-      }
+      curSec.push(line);
     }
-    if (curSentence.length) curSec.push(curSentence);
     if (curSec.length) sections.push(curSec);
 
     // 2. Chuyển đổi các câu thành các slide:
@@ -406,13 +440,9 @@
       let slide = [], count = 0;
 
       for (const sentence of sec) {
-        const visualLines = [];
-        for (const line of sentence) {
-          lastStats.lines++;
-          const wrapped = wrapLine(line);
-          if (wrapped.length > 1) lastStats.wrapped++;
-          visualLines.push(...wrapped);
-        }
+        lastStats.lines++;
+        const visualLines = wrapLine(sentence);
+        if (visualLines.length > 1) lastStats.wrapped++;
 
         // Tách các dòng hiển thị thành các unit tại dấu câu
         const units = [];
@@ -590,7 +620,8 @@
       const { sections, slideCount } = await readPptx(file);
       const lines = sections.reduce((n, s) => n + s.length, 0);
       if (!lines) { importState = { key: "importEmpty", error: true }; renderImportStatus(); return; }
-      $("lyrics").value = sections.map(s => s.join("\n")).join("\n\n");
+      const rawText = sections.map(s => s.join("\n")).join("\n\n");
+      $("lyrics").value = mergeContinuationLines(rawText.replace(/\r\n?/g, "\n").split("\n")).join("\n");
       $("title").value = file.name.replace(/\.pptx$/i, "").trim();
       renderPreview();
       importState = { key: "importDone", vars: { file: file.name, slides: slideCount, lines } };
