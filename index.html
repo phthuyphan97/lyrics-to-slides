@@ -190,6 +190,27 @@
     50% { transform: scale(.82); opacity: .45; }
   }
 
+  /* ---------- Tab: dán lời / từ PowerPoint ---------- */
+  [hidden] { display: none !important; }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 5px; margin-top: 18px;
+          border-radius: 14px; background: var(--bg); box-shadow: var(--inset); }
+  .tabs button { border: 0; cursor: pointer; padding: 9px 10px; border-radius: 10px; background: transparent;
+          color: var(--muted); font: 600 12.5px "Poppins", -apple-system, Arial, sans-serif; transition: all .2s; }
+  .tabs button:not(.active):hover { color: var(--green); }
+  .tabs button.active { background: var(--dark); color: #fff; box-shadow: 3px 3px 8px #9fb1aa; }
+  .drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+          text-align: center; margin-top: 16px; padding: 30px 18px; min-height: 230px; border-radius: 16px;
+          cursor: pointer; background: var(--bg); box-shadow: var(--inset); border: 2px dashed #b3c2bc;
+          color: var(--muted); transition: border-color .2s; }
+  .drop:hover, .drop.over { border-color: var(--green); }
+  .drop svg { color: var(--green); }
+  .drop b { color: var(--ink); font-size: 14px; font-weight: 600; }
+  .drop small { font-size: 11.5px; line-height: 1.6; }
+  .drop input { display: none; }
+  .import-status { font-size: 12px; line-height: 1.6; margin: 12px 4px 0; color: var(--green); }
+  .import-status:empty { display: none; }
+  .import-status.error { color: #b5483b; }
+
   @media (max-width: 900px) { main { grid-template-columns: 1fr; } .spec { display: none; } }
 </style>
 </head>
@@ -219,8 +240,28 @@
     <label class="field" for="title" data-i18n="titleLabel"></label>
     <input type="text" id="title" data-i18n-ph="titlePh">
 
-    <label class="field" for="lyrics" data-i18n="lyricsLabel"></label>
-    <textarea id="lyrics" data-i18n-ph="lyricsPh"></textarea>
+    <!-- Tab: dán lời / đọc từ file PowerPoint có sẵn -->
+    <div class="tabs" role="tablist">
+      <button type="button" class="active" data-tab="paste" role="tab" data-i18n="tabPaste"></button>
+      <button type="button" data-tab="pptx" role="tab" data-i18n="tabPptx"></button>
+    </div>
+
+    <div id="panePaste">
+      <label class="field" for="lyrics" data-i18n="lyricsLabel"></label>
+      <textarea id="lyrics" data-i18n-ph="lyricsPh"></textarea>
+    </div>
+
+    <div id="panePptx" hidden>
+      <label class="drop" id="dropZone">
+        <input type="file" id="pptxFile" accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 15.5V3.5"/><path d="M6.5 9 12 3.5 17.5 9"/><path d="M4.5 20.5h15"/></svg>
+        <b data-i18n="dropTitle"></b>
+        <small data-i18n="dropSub"></small>
+      </label>
+      <p class="import-status" id="importStatus"></p>
+    </div>
 
     <div class="opts">
       <label class="opt"><span><b data-i18n="optTwo"></b><small data-i18n="optTwoSub"></small></span><input type="checkbox" id="twoVisual"></label>
@@ -257,6 +298,7 @@
 
 <script>
   const LYRIC_LINES_PER_SLIDE = 2;
+  const MAX_VISUAL_LINES = 4; // trần an toàn: 4 dòng × 45pt luôn nằm gọn trong slide 7.5in
   const FONT_PT = 45;
   const SLIDE_W_IN = 13.333, MARGIN_IN = 0.3;
   // Bề rộng tối đa của 1 dòng (pt), chừa 6% an toàn
@@ -344,12 +386,17 @@
     for (const sec of sections) {
       let slide = [], count = 0;
       for (const wrapped of sec) {
-        const full = twoVisual
-          ? slide.length + wrapped.length > 2
-          : count >= LYRIC_LINES_PER_SLIDE;
-        if (slide.length && full) { slides.push(slide); slide = []; count = 0; }
-        slide.push(...wrapped);
-        count++;
+        // Câu rất dài (vd. cả đoạn nằm chung 1 đoạn văn trong file PowerPoint cũ) → chia thành từng cặp 2 dòng
+        const pieces = [];
+        for (let i = 0; i < wrapped.length; i += 2) pieces.push(wrapped.slice(i, i + 2));
+        for (const piece of pieces) {
+          const full = twoVisual
+            ? slide.length + piece.length > 2
+            : count >= LYRIC_LINES_PER_SLIDE || slide.length + piece.length > MAX_VISUAL_LINES;
+          if (slide.length && full) { slides.push(slide); slide = []; count = 0; }
+          slide.push(...piece);
+          count++;
+        }
       }
       if (slide.length) slides.push(slide);
     }
@@ -387,7 +434,9 @@
     const title = $("title").value.trim();
 
     const pptx = new PptxGenJS();
-    pptx.layout = "LAYOUT_16x9";
+    // 16:9 khổ rộng 13.333 × 7.5 in — khớp đúng với phép đo ngắt dòng & phần xem trước.
+    // (LAYOUT_16x9 chỉ rộng 10in → chữ 45pt bị tràn, Google Slides phải ngắt giữa chữ)
+    pptx.layout = "LAYOUT_WIDE";
     pptx.title = title || "Lyrics";
     pptx.defineSlideMaster({ title: "LYRICS", background: { color: "000000" } });
 
@@ -419,6 +468,99 @@
   ["skipLabels", "twoVisual"].forEach(id => $(id).addEventListener("change", renderPreview));
   $("makeBtn").addEventListener("click", makePptx);
 
+  // ---------- Đọc file PowerPoint có sẵn → lấy lời → ngắt lại ----------
+  const NS_R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+  const SKIP_PLACEHOLDERS = new Set(["sldNum", "dt", "ftr", "hdr"]); // số trang, ngày, chân trang
+  const byName = (el, name) => Array.from(el.getElementsByTagNameNS("*", name));
+
+  /** Trả về { sections, slideCount }: mỗi section = mảng câu hát (đoạn trống / slide mới → section mới). */
+  async function readPptx(file) {
+    const zip = await JSZip.loadAsync(file);
+    const xml = async (path) => {
+      const f = zip.file(path);
+      return f ? new DOMParser().parseFromString(await f.async("string"), "application/xml") : null;
+    };
+    const pres = await xml("ppt/presentation.xml");
+    const rels = await xml("ppt/_rels/presentation.xml.rels");
+    if (!pres || !rels) throw new Error("notPptx");
+
+    const targets = {};
+    byName(rels, "Relationship").forEach(r => { targets[r.getAttribute("Id")] = r.getAttribute("Target"); });
+    // Thứ tự slide đúng như trong bài trình chiếu
+    const paths = byName(pres, "sldId").map(s => {
+      const target = targets[s.getAttributeNS(NS_R, "id")] || "";
+      return target.startsWith("/") ? target.slice(1) : "ppt/" + target.replace(/^\.\//, "");
+    });
+
+    const sections = [];
+    let slideCount = 0, current = [];
+    const flush = () => { if (current.length) { sections.push(current); current = []; } };
+    for (const path of paths) {
+      const doc = await xml(path);
+      if (!doc || doc.documentElement.getAttribute("show") === "0") continue; // bỏ slide ẩn
+      slideCount++;
+      for (const shape of byName(doc, "sp")) {
+        const ph = byName(shape, "ph")[0];
+        if (ph && SKIP_PLACEHOLDERS.has(ph.getAttribute("type"))) continue;
+        for (const para of byName(shape, "p")) {
+          let text = "";
+          for (const node of para.childNodes) {
+            if (node.localName === "br") text += "\n";
+            else if (node.localName === "r" || node.localName === "fld") text += byName(node, "t").map(n => n.textContent).join("");
+          }
+          for (const line of text.split("\n")) {
+            const l = line.replace(/\s+/g, " ").trim(); // \s gồm cả khoảng trắng không ngắt
+            if (l) current.push(l); else flush();
+          }
+        }
+        flush();
+      }
+      flush();
+    }
+    return { sections, slideCount };
+  }
+
+  let importState = null; // để đổi ngôn ngữ thì thông báo cũng đổi theo
+  function renderImportStatus() {
+    const el = $("importStatus");
+    if (!importState) { el.textContent = ""; return; }
+    const { key, vars = {}, error } = importState;
+    el.className = "import-status" + (error ? " error" : "");
+    el.innerHTML = t(key).replace(/\{(\w+)\}/g, (_, k) => escapeHtml(String(vars[k] ?? "")));
+  }
+
+  async function importPptx(file) {
+    if (!file) return;
+    if (!/\.pptx$/i.test(file.name)) { importState = { key: "importNotPptx", error: true }; renderImportStatus(); return; }
+    importState = { key: "importing" }; renderImportStatus();
+    try {
+      const { sections, slideCount } = await readPptx(file);
+      const lines = sections.reduce((n, s) => n + s.length, 0);
+      if (!lines) { importState = { key: "importEmpty", error: true }; renderImportStatus(); return; }
+      $("lyrics").value = sections.map(s => s.join("\n")).join("\n\n");
+      $("title").value = file.name.replace(/\.pptx$/i, "").trim();
+      renderPreview();
+      importState = { key: "importDone", vars: { file: file.name, slides: slideCount, lines } };
+    } catch (err) {
+      console.error(err);
+      importState = { key: "importNotPptx", error: true };
+    }
+    renderImportStatus();
+  }
+
+  function showTab(name) {
+    document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+    $("panePaste").hidden = name !== "paste";
+    $("panePptx").hidden = name !== "pptx";
+  }
+  document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+
+  $("pptxFile").addEventListener("change", (e) => { importPptx(e.target.files[0]); e.target.value = ""; });
+  const drop = $("dropZone");
+  ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, () => drop.classList.remove("over")));
+  drop.addEventListener("drop", (e) => { e.preventDefault(); importPptx(e.dataTransfer.files[0]); });
+
   // ---------- Song ngữ Việt / Anh ----------
   // Icon tải về: mũi tên hướng xuống nằm trên một đường gạch ngang
   const DOWNLOAD_ICON =
@@ -446,6 +588,13 @@
       slide: "Slide", empty: "Dán lời bài hát bên trái để xem trước các slide.",
       alertEmpty: "Vui lòng dán lời bài hát trước.",
       catCheer: "Slide của bạn đã xong nè! 👍",
+      tabPaste: "Dán lời", tabPptx: "Từ file PowerPoint",
+      dropTitle: "Chọn hoặc kéo thả file PowerPoint",
+      dropSub: "File .pptx có sẵn: lời sẽ được ngắt lại<br>2 câu / slide, nền đen, Arial Bold 45",
+      importing: "Đang đọc file…",
+      importDone: "✓ Đã đọc <b>{file}</b>: {slides} slide → {lines} câu hát.<br>Xem trước bên phải; muốn sửa lời thì qua tab <b>Dán lời</b>.",
+      importEmpty: "Không tìm thấy chữ nào trong file này.",
+      importNotPptx: "Không đọc được file. Chỉ hỗ trợ file PowerPoint .pptx (file .ppt cũ hãy mở bằng PowerPoint rồi lưu lại thành .pptx).",
     },
     en: {
       subtitle: "Worship Team · lyrics slide maker",
@@ -467,6 +616,13 @@
       slide: "Slide", empty: "Paste lyrics on the left to preview the slides.",
       alertEmpty: "Please paste the lyrics first.",
       catCheer: "Your slides are ready! 👍",
+      tabPaste: "Paste lyrics", tabPptx: "From PowerPoint",
+      dropTitle: "Choose or drop a PowerPoint file",
+      dropSub: "An existing .pptx: lyrics are re-split<br>2 lines / slide, black background, Arial Bold 45",
+      importing: "Reading file…",
+      importDone: "✓ Read <b>{file}</b>: {slides} slides → {lines} lyric lines.<br>Preview on the right; to edit the lyrics, use the <b>Paste lyrics</b> tab.",
+      importEmpty: "No text found in this file.",
+      importNotPptx: "Couldn't read this file. Only PowerPoint .pptx is supported (open an old .ppt in PowerPoint and save it as .pptx).",
     },
   };
   let lang = localStorage.getItem("lyricsLang") || "vi";
@@ -479,6 +635,7 @@
     document.querySelectorAll("[data-i18n]").forEach(el => { el.innerHTML = t(el.dataset.i18n); });
     document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
     document.querySelectorAll(".lang button").forEach(b => b.classList.toggle("active", b.dataset.lang === lang));
+    renderImportStatus();
     renderPreview();
   }
   document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", () => applyLang(b.dataset.lang)));
