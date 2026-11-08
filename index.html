@@ -363,40 +363,93 @@
 
   const display = (s) => s.split(GLUE).join(" ");
 
+  const cleanFirstChar = (s) => s.trim().replace(/^[^\p{L}\p{N}]+/u, "");
+  const isLower = (s) => /^\p{Ll}/u.test(cleanFirstChar(s));
+
   /** Trả về mảng slide; mỗi slide = mảng các dòng hiển thị. */
   let lastStats = { lines: 0, wrapped: 0 };
   function buildSlides(text, skipLabels, twoVisual) {
     lastStats = { lines: 0, wrapped: 0 };
-    const lines = text.replace(/\r\n?/g, "\n").split("\n").map(l => l.replace(/\s+/g, " ").trim());
+    const rawLines = text.replace(/\r\n?/g, "\n").split("\n").map(l => l.replace(/\s+/g, " ").trim());
+
+    // 1. Nhóm các dòng thành từng section (phân cách bởi dòng trống hoặc nhãn như [Chorus], [Verse]...)
+    // Trong mỗi section, nếu một dòng bắt đầu bằng chữ thường và dòng trước chưa kết câu (không có [.!?…])
+    // thì được coi là phần tiếp nối của câu trước -> gộp chung vào 1 câu logic.
     const sections = [];
-    let current = [];
-    for (const line of lines) {
-      if (line === "" || (skipLabels && LABEL_RE.test(display(line)))) {
-        if (current.length) { sections.push(current); current = []; }
+    let curSec = [];
+    let curSentence = [];
+
+    for (const raw of rawLines) {
+      if (raw === "" || (skipLabels && LABEL_RE.test(display(raw)))) {
+        if (curSentence.length) { curSec.push(curSentence); curSentence = []; }
+        if (curSec.length) { sections.push(curSec); curSec = []; }
         continue;
       }
-      const wrapped = wrapLine(line);
-      lastStats.lines++;
-      if (wrapped.length > 1) lastStats.wrapped++;
-      current.push(wrapped);
+      const prev = curSentence[curSentence.length - 1];
+      const isContinuation = prev && isLower(display(raw)) && !/[.!?…]$/.test(display(prev));
+      if (isContinuation) {
+        curSentence.push(raw);
+      } else {
+        if (curSentence.length) curSec.push(curSentence);
+        curSentence = [raw];
+      }
     }
-    if (current.length) sections.push(current);
+    if (curSentence.length) curSec.push(curSentence);
+    if (curSec.length) sections.push(curSec);
 
+    // 2. Chuyển đổi các câu thành các slide:
+    // - Mỗi câu được wrap thành các dòng hiển thị vừa khung.
+    // - Chỉ tách sang slide mới tại ranh giới giữa các câu (chỗ có chữ viết hoa)
+    //   hoặc tại dấu câu (phẩy, chấm...). Nếu câu không có dấu câu -> giữ nguyên trên cùng 1 slide.
     const slides = [];
     for (const sec of sections) {
       let slide = [], count = 0;
-      for (const wrapped of sec) {
-        // Câu rất dài (vd. cả đoạn nằm chung 1 đoạn văn trong file PowerPoint cũ) → chia thành từng cặp 2 dòng
-        const pieces = [];
-        for (let i = 0; i < wrapped.length; i += 2) pieces.push(wrapped.slice(i, i + 2));
-        for (const piece of pieces) {
-          const full = twoVisual
-            ? slide.length + piece.length > 2
-            : count >= LYRIC_LINES_PER_SLIDE || slide.length + piece.length > MAX_VISUAL_LINES;
-          if (slide.length && full) { slides.push(slide); slide = []; count = 0; }
-          slide.push(...piece);
-          count++;
+
+      for (const sentence of sec) {
+        const visualLines = [];
+        for (const line of sentence) {
+          lastStats.lines++;
+          const wrapped = wrapLine(line);
+          if (wrapped.length > 1) lastStats.wrapped++;
+          visualLines.push(...wrapped);
         }
+
+        // Tách các dòng hiển thị thành các unit tại dấu câu
+        const units = [];
+        let curUnit = [];
+        for (const vl of visualLines) {
+          curUnit.push(vl);
+          if (PUNCT_END.test(display(vl))) {
+            units.push(curUnit);
+            curUnit = [];
+          }
+        }
+        if (curUnit.length) units.push(curUnit);
+
+        // Đảm bảo không unit nào vượt quá sức chứa tối đa của 1 slide (MAX_VISUAL_LINES = 4)
+        const safeUnits = [];
+        for (const u of units) {
+          if (u.length > MAX_VISUAL_LINES) {
+            for (let i = 0; i < u.length; i += 2) safeUnits.push(u.slice(i, i + 2));
+          } else {
+            safeUnits.push(u);
+          }
+        }
+
+        // Đưa từng unit vào slide
+        for (const u of safeUnits) {
+          const full = twoVisual
+            ? slide.length + u.length > 2
+            : count >= LYRIC_LINES_PER_SLIDE || slide.length + u.length > MAX_VISUAL_LINES;
+
+          if (slide.length && full) {
+            slides.push(slide);
+            slide = [];
+            count = 0;
+          }
+          slide.push(...u);
+        }
+        count++;
       }
       if (slide.length) slides.push(slide);
     }
